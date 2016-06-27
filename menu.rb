@@ -1,37 +1,79 @@
-require_relative './filters'
+#require_relative './filters'
 require_relative './player'
-initialize_player
-print "Let's play an addition game! "
-while true do   
-  puts prompt_player_for_answer
-  print "Enter answer: "
-  @user_input = gets.chomp
-  puts verify_answer(@user_input)
-  end_of_game
-  break if @current_player[:lives] == 0 
-  player_turns
+require_relative './question'
+require 'colorize'
+
+@repl_bool = true
+@player_turns = 0
+
+puts "Welcome to a super fun two player math game!"
+
+print "Player 1 username: "
+@username = gets.chomp
+player1 = Player.new(@username)
+player1.name = player1.name.colorize(:blue)
+print "Player 2 username: "
+@username = gets.chomp
+player2 = Player.new(@username)
+player2.name = player2.name.colorize(:blue)
+
+
+puts "Let the games begin!"
+
+
+while @repl_bool
+  
+  question = Question.new
+
+  case @player_turns
+  when 0
+    print "#{player1.name}: "
+  else 
+    print "#{player2.name}: "
+  end
+
+  print question.to_string
+  @user_input = gets.chomp.to_i
+
+  if @player_turns == 0 && question.verify_answer(@user_input)
+    puts "Right answer!".colorize(:green)
+    player1.gain_point
+    @player_turns += 1
+  elsif @player_turns == 0 && !question.verify_answer(@user_input)
+    puts "Wrong answer!".colorize(:red)
+    player1.lose_life
+    @player_turns += 1
+  elsif @player_turns == 1 && question.verify_answer(@user_input)
+    puts "Right answer!".colorize(:green)
+    player2.gain_point
+    @player_turns -= 1
+  elsif @player_turns == 1 && !question.verify_answer(@user_input)
+    puts "Wrong answer!".colorize(:red)
+    player2.lose_life
+    @player_turns -= 1
+  end
+
+  puts
+  puts "The score is now:
+        #{player1.name}: #{player1.lives} lives 
+        #{player2.name}: #{player2.lives} lives"
+  puts
+
+  if player1.lives < 1 || player2.lives < 1
+    puts "End of game."
+  if player1.lives < 1
+      puts "The winner is #{player2.name}"
+  elsif player2.lives < 1
+      puts "The winner is #{player1.name}"
+  end
+
+    puts "The final score is:
+        #{player1.name}: #{player1.lives}
+        #{player2.name}: #{player2.lives}"
+
+    @repl_bool = false
+  end
 end
 
-#create loop so continuously asks questions
 
-# $ ruby menu.rb
-# Player1, How much is 12 + 3?
-# Enter answer: 14
-# You are wrong!
-# Player2, How much is 19 + 5?
-# Enter answer: 24
-# You are correct!
-# .... eventually one player will run out of lives.
-# Player2 won.
-
-
-# $ ruby menu.rb
-# Player1, How much is 12 + 3?
-# Enter answer: 14
-# You are wrong! 2 lives left.
-# Player2, How much is 19 + 5?
-# Enter answer: 24
-# You are correct! 3 live left.
-# .... eventually one player will run out of lives.
-# Player2 won.
 
